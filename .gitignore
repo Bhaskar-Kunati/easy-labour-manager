@@ -25,3 +25,8 @@ Thumbs.db
 *.log
 .env
 .env.local
+
+# ignore to push files to git
+gemini_API_key.txt
+.env
+.env.*
