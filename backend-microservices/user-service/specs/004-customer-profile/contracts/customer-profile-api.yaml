@@ -1,0 +1,88 @@
+openapi: 3.0.3
+info:
+  title: Customer Profile API - User Service
+  version: 1.0.0
+  description: API for authenticated customers to view and manage their profile.
+paths:
+  /api/v1/customers/me:
+    get:
+      summary: Get current customer profile
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Customer profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerProfile'
+        '401':
+          description: Unauthorized (missing or invalid JWT token)
+        '404':
+          description: Profile not found
+    put:
+      summary: Update current customer profile
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerProfileUpdate'
+      responses:
+        '200':
+          description: Customer profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerProfile'
+        '400':
+          description: Validation error or malformed request
+        '401':
+          description: Unauthorized
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    CustomerProfile:
+      type: object
+      properties:
+        id:
+          type: integer
+        fullName:
+          type: string
+        profileImage:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+        gender:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CustomerProfileUpdate:
+      type: object
+      required:
+        - fullName
+      properties:
+        fullName:
+          type: string
+        profileImage:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+        gender:
+          type: string
+          nullable: true

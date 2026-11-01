@@ -1,0 +1,17 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: tracking-service
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/trackingdb
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: tracking-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.easylabour.common.event"

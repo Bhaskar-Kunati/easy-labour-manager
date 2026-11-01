@@ -1,0 +1,139 @@
+openapi: 3.0.3
+info:
+  title: User Service - Worker Profile & Skill Management API
+  version: 1.0.0
+  description: API for authenticated workers to manage their profile and skills in Easy Labour Manager.
+paths:
+  /api/v1/workers/profile:
+    get:
+      summary: Get authenticated worker's profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Worker profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkerProfile'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (customer account or wrong role)
+    put:
+      summary: Update authenticated worker's editable profile fields
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fullName:
+                  type: string
+                profileImage:
+                  type: string
+                experienceYears:
+                  type: integer
+                workingRadius:
+                  type: integer
+      responses:
+        '200':
+          description: Worker profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkerProfile'
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized
+  /api/v1/workers/skills:
+    post:
+      summary: Add a service skill to the authenticated worker profile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - serviceCategoryId
+              properties:
+                serviceCategoryId:
+                  type: string
+      responses:
+        '200':
+          description: Skill added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkerSkill'
+        '400':
+          description: Duplicate skill or invalid catalog category
+        '401':
+          description: Unauthorized
+  /api/v1/workers/skills/{skillId}:
+    delete:
+      summary: Remove a skill belonging to the authenticated worker
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: skillId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Skill removed successfully
+        '403':
+          description: Forbidden (skill belongs to another worker)
+        '404':
+          description: Skill not found
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    WorkerProfile:
+      type: object
+      properties:
+        id:
+          type: integer
+        fullName:
+          type: string
+        profileImage:
+          type: string
+        experienceYears:
+          type: integer
+        rating:
+          type: number
+          format: double
+        totalJobs:
+          type: integer
+        availabilityStatus:
+          type: string
+        verificationStatus:
+          type: string
+        workingRadius:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+    WorkerSkill:
+      type: object
+      properties:
+        id:
+          type: integer
+        serviceCategoryId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time

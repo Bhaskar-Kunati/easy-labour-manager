@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: database-config
+data:
+  POSTGRES_URL: "jdbc:postgresql://postgres-service:5432/easylabour"
+  MONGO_URI: "mongodb://mongo-service:27017"
+  KAFKA_BOOTSTRAP_SERVERS: "kafka-service:9092"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: database-secrets
+type: Opaque
+data:
+  POSTGRES_USER: "ZWxfdXNlcg==" # el_user
+  POSTGRES_PASSWORD: "cGFzc3dvcmQ=" # password

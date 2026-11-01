@@ -1,0 +1,15 @@
+jwt:
+  secret: 404e635266556a586e3272357538782f413f4428472b4b6250655368566d5971
+  expiration: 86400000
+  datasource:
+    url: jdbc:postgresql://127.0.0.1:5433/el_db
+    username: el_user
+    password: password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+server:
+  port: 8081

@@ -1,0 +1,44 @@
+openapi: 3.0.3
+info:
+  title: Auth Service API - Customer Registration
+  version: 1.0.0
+paths:
+  /api/v1/auth/register:
+    post:
+      summary: Register a new customer with mobile number and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - mobileNumber
+                - password
+              properties:
+                mobileNumber:
+                  type: string
+                  example: "+1234567890"
+                password:
+                  type: string
+                  format: password
+                  example: "SecurePassword123"
+      responses:
+        '200':
+          description: Successful registration
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User registered successfully"
+        '400':
+          description: Bad Request (missing or malformed input / invalid mobile format)
+        '409':
+          description: Conflict (mobile number already registered)
+        '500':
+          description: Internal Server Error (unexpected application or service failure)
+        '503':
+          description: Service Unavailable (database or dependent infrastructure unavailable)

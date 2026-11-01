@@ -1,0 +1,156 @@
+openapi: 3.0.3
+info:
+  title: Customer Booking API - Booking Service
+  version: 1.0.0
+  description: API for customers to create, view, and cancel service bookings.
+paths:
+  /api/v1/bookings:
+    post:
+      summary: Create a scheduled service booking
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingRequest'
+      responses:
+        '201':
+          description: Booking created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+        '200':
+          description: Existing booking returned (idempotency retry)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+        '400':
+          description: Validation error or past date/time
+        '401':
+          description: Unauthorized
+        '409':
+          description: Idempotency conflict (same key with different payload)
+    get:
+      summary: Get all bookings for the authenticated customer
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of customer bookings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Booking'
+        '401':
+          description: Unauthorized
+  /api/v1/bookings/{id}:
+    get:
+      summary: Get booking details by ID
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Booking details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (accessing another customer's booking)
+        '404':
+          description: Booking not found
+  /api/v1/bookings/{id}/cancel:
+    put:
+      summary: Cancel an eligible booking
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Booking cancelled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+        '400':
+          description: Booking cannot be cancelled in its current state
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Booking not found
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    BookingRequest:
+      type: object
+      required:
+        - serviceId
+        - serviceDateTime
+        - location
+      properties:
+        serviceId:
+          type: integer
+        serviceDateTime:
+          type: string
+          format: date-time
+        location:
+          type: string
+    Booking:
+      type: object
+      properties:
+        id:
+          type: integer
+        customerId:
+          type: string
+        serviceId:
+          type: integer
+        serviceName:
+          type: string
+        bookedPrice:
+          type: number
+        pricingType:
+          type: string
+        serviceDateTime:
+          type: string
+          format: date-time
+        location:
+          type: string
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time

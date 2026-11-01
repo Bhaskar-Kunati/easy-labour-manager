@@ -1,0 +1,20 @@
+pluginManagement {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+rootProject.name = 'easy-labour-manager-backend'
+
+include 'common-lib'
+include 'auth-service'
+include 'user-service'
+include 'booking-service'
+include 'catalog-service'
+include 'api-gateway'
+include 'notification-service'
+include 'payment-service'
+include 'review-service'
+include 'tracking-service'
+include 'wallet-service'

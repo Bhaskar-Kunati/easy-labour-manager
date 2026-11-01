@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tracking-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tracking-service
+  template:
+    metadata:
+      labels:
+        app: tracking-service
+    spec:
+      containers:
+      - name: tracking-service
+        image: easylabour/tracking-service:latest
+        ports:
+        - containerPort: 8084
+        env:
+        - name: SERVER_PORT
+          value: "8084"
+        - name: SPRING_DATA_MONGODB_URI
+          valueFrom:
+            configMapKeyRef:
+              name: database-config
+              key: MONGO_URI
+        - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+          valueFrom:
+            configMapKeyRef:
+              name: database-config
+              key: KAFKA_BOOTSTRAP_SERVERS

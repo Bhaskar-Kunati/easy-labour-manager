@@ -1,0 +1,57 @@
+openapi: 3.0.3
+info:
+  title: Easy Labour Coupon & Admin API
+  version: 1.0.0
+paths:
+  /api/v1/admin/coupons:
+    post:
+      summary: Create a new coupon (Admin only)
+      security:
+        - BearerAuth: []
+      responses:
+        '201':
+          description: Coupon created successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (Non-admin)
+    get:
+      summary: List all coupons (Admin only)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of coupons retrieved successfully
+  /api/v1/admin/coupons/{id}:
+    put:
+      summary: Update a coupon (Admin only)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Coupon updated successfully
+    delete:
+      summary: Delete or deactivate a coupon (Admin only)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Coupon deleted/deactivated successfully
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

@@ -1,0 +1,151 @@
+openapi: 3.0.3
+info:
+  title: Review & Support Service API
+  version: 1.0.0
+  description: API for customer reviews, ratings, and support ticketing in Easy Labour Manager.
+paths:
+  /api/v1/reviews:
+    post:
+      summary: Submit a review for a completed booking
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - bookingId
+                - workerId
+                - rating
+              properties:
+                bookingId:
+                  type: string
+                workerId:
+                  type: string
+                serviceId:
+                  type: string
+                rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                comment:
+                  type: string
+      responses:
+        '200':
+          description: Review created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+        '400':
+          description: Invalid rating or duplicate review
+        '403':
+          description: Unauthorized or booking not completed
+  /api/v1/reviews/worker/{workerId}:
+    get:
+      summary: Get reviews for a worker
+      parameters:
+        - name: workerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of reviews
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Review'
+  /api/v1/support:
+    post:
+      summary: Create a support ticket
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - subject
+                - message
+              properties:
+                bookingId:
+                  type: string
+                subject:
+                  type: string
+                message:
+                  type: string
+      responses:
+        '200':
+          description: Support ticket created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportTicket'
+    get:
+      summary: Get authenticated customer support tickets
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of support tickets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SupportTicket'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Review:
+      type: object
+      properties:
+        id:
+          type: integer
+        bookingId:
+          type: string
+        customerId:
+          type: string
+        workerId:
+          type: string
+        serviceId:
+          type: string
+        rating:
+          type: integer
+        comment:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    SupportTicket:
+      type: object
+      properties:
+        id:
+          type: integer
+        ticketId:
+          type: string
+        bookingId:
+          type: string
+        customerId:
+          type: string
+        subject:
+          type: string
+        message:
+          type: string
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time

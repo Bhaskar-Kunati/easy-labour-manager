@@ -1,0 +1,22 @@
+---
+files:
+- path: "D:/work-space/easy-labour-manager/android-app/local.properties"
+  readOnly: false
+- path: "D:/work-space/easy-labour-manager/backend-microservices/api-gateway/src/main/resources/application.yml"
+  readOnly: false
+- path: "D:/work-space/easy-labour-manager/backend-microservices/auth-service/src/main/java/com/easylabour/authservice/config/AuthorizationServerConfig.java"
+  readOnly: false
+- path: "D:/work-space/easy-labour-manager/backend-microservices/auth-service/src/main/java/com/easylabour/authservice/web/controller/AuthController.java"
+  readOnly: false
+- path: "D:/work-space/easy-labour-manager/backend-microservices/auth-service/src/main/java/com/easylabour/authservice/domain/repository/UserRepository.java"
+  readOnly: false
+- path: "D:/work-space/easy-labour-manager/backend-microservices/auth-service/src/main/java/com/easylabour/authservice/domain/model/User.java"
+  readOnly: false
+- path: "D:/work-space/easy-labour-manager/backend-microservices/auth-service/src/main/java/com/easylabour/authservice/AuthServiceApplication.java"
+  readOnly: false
+- path: "D:/work-space/easy-labour-manager/backend-microservices/auth-service/build.gradle"
+  readOnly: false
+- path: "D:/work-space/easy-labour-manager/backend-microservices/user-service/src/main/resources/application.yml"
+  readOnly: false
+- path: "D:/work-space/easy-labour-manager/backend-microservices/user-service/src/main/java/com/easylabour/userservice/application/service/UserService.java"
+  readOnly: false

@@ -1,0 +1,126 @@
+openapi: 3.0.3
+info:
+  title: Service Catalog & Search API - Catalog Service
+  version: 1.0.0
+  description: API for browsing service categories, viewing services, and searching.
+paths:
+  /api/v1/categories:
+    get:
+      summary: Get all active service categories
+      responses:
+        '200':
+          description: List of active service categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ServiceCategory'
+  /api/v1/categories/{id}:
+    get:
+      summary: Get category details by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Category details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceCategory'
+        '404':
+          description: Category not found
+  /api/v1/services:
+    get:
+      summary: Get active services (optional category filter)
+      parameters:
+        - name: categoryId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of active services
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Service'
+  /api/v1/services/{id}:
+    get:
+      summary: Get service details by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Service details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Service'
+        '404':
+          description: Service not found
+  /api/v1/services/search:
+    get:
+      summary: Search services by keyword
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Matching services
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Service'
+components:
+  schemas:
+    ServiceCategory:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        iconUrl:
+          type: string
+        status:
+          type: string
+    Service:
+      type: object
+      properties:
+        id:
+          type: integer
+        category:
+          $ref: '#/components/schemas/ServiceCategory'
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        pricingType:
+          type: string
+        serviceIncludes:
+          type: string
+        serviceExcludes:
+          type: string
+        status:
+          type: string

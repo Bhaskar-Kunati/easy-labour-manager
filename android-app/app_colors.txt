@@ -1,0 +1,88 @@
+| Purpose                | Color Name          | Hex Code    | Where to Use                                               |
+| ---------------------- | ------------------- | ----------- | ---------------------------------------------------------- |
+| Primary                | Deep Plum           | `#6A1B4D`   | Primary buttons, app branding, selected tabs, active icons |
+| Primary Dark           | Rich Burgundy       | `#4A1034`   | Pressed button state, dark theme primary                   |
+| Primary Light          | Soft Rose           | `#E8BFD1`   | Button backgrounds, chips, selected card backgrounds       |
+| Secondary              | Gold                | `#C89B3C`   | Premium badges, highlights, CTA accents                    |
+| Secondary Light        | Champagne Gold      | `#E3C87A`   | Offers, promotional cards, icons                           |
+| Accent                 | Rose Gold           | `#D89AA6`   | Small highlights, ratings, decorative elements             |
+| Background             | Off White           | `#FAF9F7`   | Entire screen background                                   |
+| Surface                | Pure White          | `#FFFFFF`   | Cards, dialogs, bottom sheets                              |
+| Surface Variant        | Light Gray          | `#F5F5F5`   | Sections, containers, grouped layouts                      |
+| Card Background        | White               | `#FFFFFF`   | Service cards, profile cards                               |
+| Elevated Card          | Ivory White         | `#FFFDFB`   | Featured cards, premium sections                           |
+| Dialog Background      | White               | `#FFFFFF`   | Alert dialogs, popups                                      |
+| Top App Bar            | White               | `#FFFFFF`   | Toolbar background                                         |
+| Bottom Navigation      | White               | `#FFFFFF`   | Bottom navigation bar                                      |
+| Search Bar Background  | Very Light Gray     | `#F7F7F7`   | Search box background                                      |
+| Search Bar Border      | Light Gray          | `#E3E3E3`   | Search box outline                                         |
+| Search Icon            | Gray                | `#757575`   | Search icon                                                |
+| Search Placeholder     | Medium Gray         | `#9E9E9E`   | Hint text in search fields                                 |
+| Primary Text           | Almost Black        | `#1F1F1F`   | Titles, headings                                           |
+| Secondary Text         | Dark Gray           | `#6E6E6E`   | Descriptions, subtitles                                    |
+| Tertiary Text          | Medium Gray         | `#8A8A8A`   | Captions, timestamps                                       |
+| Hint Text              | Light Gray          | `#A3A3A3`   | Input placeholders                                         |
+| Disabled Text          | Gray                | `#BDBDBD`   | Disabled labels                                            |
+| White Text             | White               | `#FFFFFF`   | Text on dark buttons and banners                           |
+| Divider                | Divider Gray        | `#E6E6E6`   | Divider lines                                              |
+| Border                 | Border Gray         | `#D9D9D9`   | Card borders, text field borders                           |
+| Outline                | Outline Gray        | `#CFCFCF`   | Outlined buttons, cards                                    |
+| Icon Primary           | Deep Plum           | `#6A1B4D`   | Active icons                                               |
+| Icon Secondary         | Gray                | `#757575`   | Normal icons                                               |
+| Icon Disabled          | Light Gray          | `#C2C2C2`   | Disabled icons                                             |
+| Primary Button         | Deep Plum           | `#6A1B4D`   | Login, Register, Book Now buttons                          |
+| Primary Button Text    | White               | `#FFFFFF`   | Text on primary buttons                                    |
+| Secondary Button       | White               | `#FFFFFF`   | Secondary buttons                                          |
+| Secondary Button Text  | Deep Plum           | `#6A1B4D`   | Text on outlined buttons                                   |
+| Disabled Button        | Light Gray          | `#D6D6D6`   | Disabled button background                                 |
+| Disabled Button Text   | Gray                | `#8A8A8A`   | Disabled button text                                       |
+| Success                | Green               | `#2E7D32`   | Success messages, completed status                         |
+| Success Background     | Light Green         | `#E8F5E9`   | Success alert background                                   |
+| Warning                | Amber               | `#F9A825`   | Warning icons, pending status                              |
+| Warning Background     | Light Yellow        | `#FFF8E1`   | Warning alerts                                             |
+| Error                  | Red                 | `#D32F2F`   | Error text, validation, failed status                      |
+| Error Background       | Light Red           | `#FFEBEE`   | Error messages                                             |
+| Information            | Blue                | `#1976D2`   | Information banners, links                                 |
+| Information Background | Light Blue          | `#E3F2FD`   | Information cards                                          |
+| Banner Background      | Soft Pink           | `#F4E8EC`   | Promotional banners                                        |
+| Promotion Card         | Blush Pink          | `#F9EEF3`   | Discount and offer cards                                   |
+| Category Icon Circle   | Light Rose          | `#F3E2EA`   | Service icon backgrounds                                   |
+| Selected Item          | Deep Plum           | `#6A1B4D`   | Selected tab, selected navigation item                     |
+| Unselected Item        | Gray                | `#9E9E9E`   | Unselected navigation icons                                |
+| Badge Background       | Red                 | `#E53935`   | Notification count badges                                  |
+| Badge Text             | White               | `#FFFFFF`   | Badge numbers                                              |
+| Notification Dot       | Orange              | `#FF6F00`   | Notification indicator                                     |
+| Shimmer Base           | Light Gray          | `#ECECEC`   | Skeleton loading background                                |
+| Shimmer Highlight      | White               | `#F8F8F8`   | Skeleton loading animation                                 |
+| Shadow                 | Black (20% Opacity) | `#33000000` | Card shadows                                               |
+| Ripple Effect          | Black (10% Opacity) | `#1A000000` | Touch ripple effect                                        |
+| Transparent            | Transparent         | `#00000000` | Transparent backgrounds                                    |
+
+
+Material 3 Recommended Neutrals:
+| Purpose  | Hex Code  |
+| -------- | --------- |
+| Gray 50  | `#FAFAFA` |
+| Gray 100 | `#F5F5F5` |
+| Gray 200 | `#EEEEEE` |
+| Gray 300 | `#E0E0E0` |
+| Gray 400 | `#BDBDBD` |
+| Gray 500 | `#9E9E9E` |
+| Gray 600 | `#757575` |
+| Gray 700 | `#616161` |
+| Gray 800 | `#424242` |
+| Gray 900 | `#212121` |
+
+Neutral Gray Palette
+| Purpose  | Color Name        | Hex Code  | Where to Use      |
+| -------- | ----------------- | --------- | ----------------- |
+| Gray 50  | Extra Light Gray  | `#FAFAFA` | App background    |
+| Gray 100 | Light Gray        | `#F5F5F5` | Containers        |
+| Gray 200 | Soft Gray         | `#EEEEEE` | Cards, separators |
+| Gray 300 | Border Gray       | `#E0E0E0` | Borders           |
+| Gray 400 | Medium Light Gray | `#BDBDBD` | Disabled elements |
+| Gray 500 | Neutral Gray      | `#9E9E9E` | Secondary icons   |
+| Gray 600 | Dark Gray         | `#757575` | Secondary text    |
+| Gray 700 | Charcoal          | `#616161` | Labels            |
+| Gray 800 | Dark Charcoal     | `#424242` | Headers           |
+| Gray 900 | Near Black        | `#212121` | Main text         |

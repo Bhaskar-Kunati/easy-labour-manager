@@ -1,0 +1,56 @@
+openapi: 3.0.3
+info:
+  title: Easy Labour Booking & Worker Assignment API
+  version: 1.0.0
+paths:
+  /api/v1/workers/bookings:
+    get:
+      summary: Get bookings assigned to authenticated worker
+      responses:
+        '200':
+          description: List of assigned bookings
+  /api/v1/workers/bookings/{bookingId}:
+    get:
+      summary: Get details of an assigned booking
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Booking details retrieved successfully
+        '403':
+          description: Access denied (not assigned worker)
+  /api/v1/workers/bookings/{bookingId}/status:
+    put:
+      summary: Update job/booking status
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Status updated successfully
+  /api/v1/admin/bookings/{id}/assign-worker:
+    post:
+      summary: Assign eligible worker to booking (Admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: workerId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Worker assigned successfully
+        '400':
+          description: Worker ineligible or conflict
