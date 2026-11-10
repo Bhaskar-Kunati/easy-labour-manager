@@ -1,4 +1,4 @@
-# Implementation Tasks: User Wallet & Transaction Management
+# Implementation Tasks: User Wallet & Transaction Management (Enhanced E2E Integration & Dual-Destination Refunds)
 
 **Feature Branch**: `014-user-wallet-management`
 **Spec**: [specs/014-user-wallet-management/spec.md](spec.md)
@@ -33,7 +33,7 @@
 - [x] T018 [US3] Implement atomic wallet debit service method utilizing `findByUserIdWithLock`, insufficient balance check, balance decrement, `DEBIT` transaction recording, and duplicate debit prevention in `backend-microservices/wallet-service/src/main/java/com/easylabour/walletservice/application/service/WalletService.java`.
 - [x] T019 [US3] Implement internal service endpoint `POST /api/wallet/debit` (verifying authoritative booking/payment amounts without client-supplied balance overrides) in `backend-microservices/wallet-service/src/main/java/com/easylabour/walletservice/web/controller/WalletInternalController.java`.
 
-## Phase 6: Worker Earnings & Refund Credits [US4, US5]
+## Phase 6: Worker Earnings & Dual-Destination Refunds [US4, US5]
 - [x] T020 [US4, US5] Implement internal credit request DTO for worker earnings and refunds in `backend-microservices/wallet-service/src/main/java/com/easylabour/walletservice/web/dto/WalletCreditRequest.java`.
 - [x] T021 [US4, US5] Implement atomic wallet credit service method with pessimistic locking, ledger credit recording, and reference-based idempotency to prevent duplicate payouts or refund credits in `backend-microservices/wallet-service/src/main/java/com/easylabour/walletservice/application/service/WalletService.java`.
 - [x] T022 [US4, US5] Implement internal service endpoint `POST /api/wallet/credit` in `backend-microservices/wallet-service/src/main/java/com/easylabour/walletservice/web/controller/WalletInternalController.java`.
@@ -56,3 +56,11 @@
 - [x] T031 [P] Implement idempotency tests verifying duplicate reference IDs do not create duplicate ledger entries.
 - [x] T032 [P] Implement security and authorization tests verifying 401/403 responses for unauthenticated requests, cross-user access attempts, and non-admin access to admin endpoints.
 - [x] T033 Run Gradle test suite for `wallet-service` and verify regression compatibility across backend microservices.
+
+## Phase 11: Cross-Service Integration, Security Hardening & Reliability [US4, US5]
+- [ ] T034 [US7] Implement a dedicated `OncePerRequestFilter` (`InternalServiceKeyFilter.java`) in `wallet-service/src/main/java/com/easylabour/walletservice/infrastructure/security/` to validate `X-Internal-Service-Key` at the Spring Security filter layer.
+- [ ] T035 [US7] Integrate `InternalServiceKeyFilter` with `SecurityConfig.java` to protect `/api/wallet/credit` and `/api/wallet/debit` and add unit tests (`WalletSecurityTest.java`) verifying missing/invalid credentials return 401/403 and customer JWTs cannot bypass internal authentication. (Depends on T034).
+- [ ] T036 [US1] Enhance wallet transaction reference validation in `WalletService.java` to guarantee reference IDs cannot be reused with differing user IDs, amounts, or transaction types, while preserving unique DB constraints. Add duplicate/concurrent reference tests. (Depends on T021).
+- [ ] T037 [US4] Implement transactional outbox persistence (`outbox_events` table and publisher) in `booking-service` to reliably record and retry job completion worker payouts (`BOOKING_EARNINGS_{bookingId}`) targeting `wallet-service` `POST /api/wallet/credit`. Add failure recovery tests. (Depends on T022).
+- [ ] T038 [US5] Implement transactional outbox persistence and refund state machine (`PENDING`, `PROCESSING`, `COMPLETED`, `FAILED`, `RETRY_PENDING`, `UNKNOWN`) in `payment-service` supporting dual-destination refunds (`WALLET` crediting via `wallet-service` and `ORIGINAL_PAYMENT_METHOD` via payment gateway abstraction with idempotency keys). Add mutual exclusivity and timeout reconciliation tests. (Depends on T035, T037).
+- [ ] T039 [US4, US5] Implement cross-service integration test suite verifying end-to-end worker payout success/retries, wallet refund success/retries, original payment gateway refund reconciliation, concurrent destination execution prevention, and database/service outage recovery scenarios. (Depends on T037, T038).

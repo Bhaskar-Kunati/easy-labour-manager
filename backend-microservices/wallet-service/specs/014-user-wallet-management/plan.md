@@ -1,12 +1,12 @@
-# Implementation Plan: User Wallet & Transaction Management
+# Implementation Plan: User Wallet & Transaction Management (Dual-Destination Refunds & E2E Integration)
 
-**Branch**: `014-user-wallet-management` | **Date**: 2026-10-07 | **Spec**: [specs/014-user-wallet-management/spec.md](spec.md)
+**Branch**: `014-user-wallet-management` | **Date**: 2026-10-07 (Updated for Dual-Destination Refunds & E2E Integration) | **Spec**: [specs/014-user-wallet-management/spec.md](spec.md)
 
 **Input**: Feature specification from `backend-microservices/wallet-service/specs/014-user-wallet-management/spec.md`
 
 ## Summary
 
-Implement a dedicated `wallet-service` using Spring Boot 3.2 (Java 19), Spring Data JPA with PostgreSQL, and Spring Security JWT. The service will be the authoritative owner of digital wallets, balances, transaction ledger (`wallet_transactions`), top-ups, booking debits, worker earnings credits, refunds, and admin audits. Concurrency safety will be enforced using pessimistic row locking (`PESSIMISTIC_WRITE`) and unique constraints for transaction idempotency, integrated via Kafka events.
+Implement and integrate a dedicated `wallet-service` alongside updates to `booking-service` and `payment-service` to support digital wallets, authoritative top-ups, booking debits, worker earnings payouts, and **dual-destination customer refunds** (`WALLET` and `ORIGINAL_PAYMENT_METHOD`). Concurrency safety is enforced using pessimistic row locking (`PESSIMISTIC_WRITE`) and unique constraints for transaction idempotency, secured via externalized internal service keys (`X-Internal-Service-Key`).
 
 ## Technical Context
 
@@ -14,28 +14,38 @@ Implement a dedicated `wallet-service` using Spring Boot 3.2 (Java 19), Spring D
 
 **Primary Dependencies**: Spring Web, Spring Data JPA, Spring Security, PostgreSQL Driver, Spring Kafka, Lombok, Validation
 
-**Storage**: PostgreSQL (`wallets`, `wallet_transactions` tables)
+**Storage**: PostgreSQL (`wallets`, `wallet_transactions`, `refunds` tables)
 
-**Testing**: JUnit 5, Mockito, Spring Boot Test, Testcontainers (optional/embedded)
+**Testing**: JUnit 5, Mockito, Spring Boot Test, Spring Security Test
 
 **Target Platform**: Linux container / local JVM (Docker Compose)
 
-**Project Type**: Spring Boot Microservice (`wallet-service`)
+**Project Type**: Spring Boot Microservices (`wallet-service`, `payment-service`, `booking-service`)
 
-**Performance Goals**: <200ms p95 response time for wallet balance and debit operations
+**Performance Goals**: <200ms p95 response time for wallet balance and financial operations
 
-**Constraints**: Strict ACID consistency, zero negative balances, race-condition free concurrency via pessimistic locking, idempotent ledger updates
+**Constraints**: Strict ACID consistency, zero negative balances, race-condition free concurrency via pessimistic locking, idempotent ledger updates, secure internal service authentication
 
-**Scale/Scope**: Platform-wide user wallet management (customers and workers)
+## Refund Architecture & Workflow
 
-## Constitution Check
+### 1. Refund Destinations
+- **`WALLET`**: Credited to the customer's digital wallet. `payment-service` verifies approval and invokes `wallet-service` `POST /api/wallet/credit` with reference `REFUND_{refundId}`. `wallet-service` validates `X-Internal-Service-Key`, credits the wallet atomically, records a `CREDIT` ledger transaction, and updates the refund record to `COMPLETED`.
+- **`ORIGINAL_PAYMENT_METHOD`**: Processed through the original payment gateway. `payment-service` owns gateway execution and confirmation. Does NOT credit the customer's wallet. Records gateway refund reference and updates status to `COMPLETED`.
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+### 2. Refund State Machine
+- **`PENDING`** (Initial state upon refund request submission and destination selection)
+- **`PROCESSING`** (Locked during gateway execution or wallet credit invocation)
+- **`COMPLETED`** (Successfully processed via gateway or wallet credit)
+- **`FAILED`** (Gateway rejection or wallet service failure; eligible for controlled retry)
 
-- Spring Boot & Java 19 conventions followed: **PASS**
-- Dedicated microservice isolation (`wallet-service`): **PASS**
-- Transaction safety & pessimistic locking for financial ledger: **PASS**
-- Idempotency and Kafka event emission post-commit: **PASS**
+### 3. Idempotency & Retry Strategy
+- Unique reference ID: `REFUND_{refundId}` for wallet credit; gateway idempotency keys for payment gateway refunds.
+- Database uniqueness and state machine checks (`PENDING` -> `PROCESSING` -> `COMPLETED`) prevent duplicate execution.
+- Exponential backoff retry for transient gateway or network failures.
+
+### 4. Failure Recovery & Reconciliation
+- **Gateway Success, App DB Failure**: Reconciled via scheduled reconciliation jobs querying gateway refund status against application refund records.
+- **Mutual Exclusivity**: Strict state checks ensure a refund order can never execute both destinations simultaneously.
 
 ## Project Structure
 
@@ -49,28 +59,5 @@ backend-microservices/wallet-service/specs/014-user-wallet-management/
 ├── quickstart.md        # Phase 1 output
 ├── contracts/           # Phase 1 output
 │   └── rest-api.yaml
-└── tasks.md             # Phase 2 output (created by /speckit.tasks)
+└── tasks.md             # Phase 2 output
 ```
-
-### Source Code (repository root)
-
-```text
-backend-microservices/wallet-service/
-├── src/main/java/com/easylabour/walletservice/
-│   ├── WalletServiceApplication.java
-│   ├── domain/
-│   │   ├── model/
-│   │   └── repository/
-│   ├── application/
-│   │   └── service/
-│   ├── web/
-│   │   ├── controller/
-│   │   └── dto/
-│   └── infrastructure/
-│       └── kafka/
-└── src/test/java/com/easylabour/walletservice/
-    ├── application/service/
-    └── web/controller/
-```
-
-**Structure Decision**: Standard Spring Boot microservice layout matching sibling services (`booking-service`, `payment-service`, `auth-service`).
