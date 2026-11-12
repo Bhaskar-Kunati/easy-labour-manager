@@ -1,0 +1,104 @@
+openapi: 3.0.3
+info:
+  title: Worker Payout & Withdrawal API
+  version: 1.0.0
+  description: REST API contracts for worker payout requests and administrative review in wallet-service.
+paths:
+  /api/wallet/payouts:
+    post:
+      summary: Request a worker withdrawal/payout
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - amount
+                - destinationId
+                - destinationType
+              properties:
+                amount:
+                  type: number
+                  format: decimal
+                  example: 1500.00
+                destinationId:
+                  type: string
+                  example: "dest_bank_01"
+                destinationType:
+                  type: string
+                  enum: [BANK_ACCOUNT, UPI]
+                  example: "BANK_ACCOUNT"
+      responses:
+        '201':
+          description: Payout request created successfully and funds reserved.
+        '400':
+          description: Invalid amount or insufficient available balance.
+        '401':
+          description: Unauthorized.
+    get:
+      summary: List worker's payout requests
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of payout requests retrieved.
+  /api/v1/admin/payouts:
+    get:
+      summary: List all payout requests (Admin)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of payouts retrieved.
+  /api/v1/admin/payouts/{id}/approve:
+    post:
+      summary: Approve and execute payout (Admin)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Payout approved and executed.
+  /api/v1/admin/payouts/{id}/reject:
+    post:
+      summary: Reject payout and release reserved funds (Admin)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Payout rejected and funds released.
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

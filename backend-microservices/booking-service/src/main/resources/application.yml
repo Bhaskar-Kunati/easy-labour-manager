@@ -18,3 +18,9 @@ spring:
 
 server:
   port: 8083
+
+wallet:
+  service:
+    url: ${WALLET_SERVICE_URL:http://localhost:8089}
+  internal:
+    secret-key: ${WALLET_INTERNAL_SECRET_KEY:internal-secret-key}

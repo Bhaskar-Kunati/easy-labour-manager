@@ -1,0 +1,27 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: admin-service
+  datasource:
+    url: jdbc:postgresql://127.0.0.1:5433/el_db
+    username: el_user
+    password: password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+services:
+  booking:
+    url: ${BOOKING_SERVICE_URL:http://localhost:8083}
+  payment:
+    url: ${PAYMENT_SERVICE_URL:http://localhost:8085}
+  wallet:
+    url: ${WALLET_SERVICE_URL:http://localhost:8089}
+
+wallet:
+  internal:
+    secret-key: ${WALLET_INTERNAL_SECRET_KEY:internal-secret-key}

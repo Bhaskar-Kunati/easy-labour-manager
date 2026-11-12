@@ -1,0 +1,42 @@
+openapi: 3.0.3
+info:
+  title: Admin Analytics & Reconciliation API
+  version: 1.0.0
+  description: API for admin platform overview, financial analytics, and reconciliation.
+paths:
+  /api/v1/admin/analytics/overview:
+    get:
+      summary: Get platform overview analytics
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Overview metrics retrieved successfully
+        '403':
+          description: Forbidden (Requires ROLE_ADMIN)
+  /api/v1/admin/analytics/financial-reconciliation:
+    get:
+      summary: Get financial reconciliation summary
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Reconciliation summary retrieved successfully
+        '403':
+          description: Forbidden (Requires ROLE_ADMIN)
+  /api/v1/admin/analytics/bookings-summary:
+    get:
+      summary: Get bookings summary and status counts
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Bookings summary retrieved successfully
+        '403':
+          description: Forbidden (Requires ROLE_ADMIN)
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

@@ -28,6 +28,10 @@ public class Wallet {
     @Builder.Default
     private BigDecimal balance = BigDecimal.ZERO;
 
+    @Column(nullable = false, precision = 19, scale = 2)
+    @Builder.Default
+    private BigDecimal reservedBalance = BigDecimal.ZERO;
+
     @Column(nullable = false, length = 3)
     @Builder.Default
     private String currency = "INR";
@@ -48,6 +52,9 @@ public class Wallet {
         updatedAt = LocalDateTime.now();
         if (balance == null) {
             balance = BigDecimal.ZERO;
+        }
+        if (reservedBalance == null) {
+            reservedBalance = BigDecimal.ZERO;
         }
         if (currency == null) {
             currency = "INR";

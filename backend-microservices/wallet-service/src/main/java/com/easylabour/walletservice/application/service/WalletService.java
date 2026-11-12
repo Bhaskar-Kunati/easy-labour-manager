@@ -2,9 +2,9 @@ package com.easylabour.walletservice.application.service;
 
 import com.easylabour.walletservice.infrastructure.client.PaymentClient;
 import com.easylabour.walletservice.web.dto.PaymentResponseDto;
+import com.easylabour.walletservice.domain.model.TransactionType;
 import com.easylabour.walletservice.domain.model.Wallet;
 import com.easylabour.walletservice.domain.model.WalletTransaction;
-import com.easylabour.walletservice.domain.model.TransactionType;
 import com.easylabour.walletservice.domain.repository.WalletRepository;
 import com.easylabour.walletservice.domain.repository.WalletTransactionRepository;
 import com.easylabour.walletservice.infrastructure.kafka.WalletEvent;
@@ -12,7 +12,6 @@ import com.easylabour.walletservice.infrastructure.kafka.WalletEventProducer;
 import com.easylabour.walletservice.web.dto.WalletResponse;
 import com.easylabour.walletservice.web.dto.WalletTransactionResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,69 +72,13 @@ public class WalletService {
                 .build()).collect(Collectors.toList());
     }
 
-    private WalletResponse validateReferenceAndGetIdempotentResponseIfMatch(String userId, BigDecimal amount, String referenceId, TransactionType expectedType) {
-        if (referenceId != null && !referenceId.isBlank()) {
-            Optional<WalletTransaction> existingTxOpt = walletTransactionRepository.findByReferenceId(referenceId);
-            if (existingTxOpt.isPresent()) {
-                WalletTransaction existingTx = existingTxOpt.get();
-                if (existingTx.getType() != expectedType) {
-                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Reference ID already exists with a different transaction type");
-                }
-                if (existingTx.getAmount() == null || existingTx.getAmount().compareTo(amount) != 0) {
-                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Reference ID already exists with a different amount");
-                }
-                Wallet existingWallet = walletRepository.findById(existingTx.getWalletId())
-                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.CONFLICT, "Existing transaction wallet not found"));
-                if (!existingWallet.getUserId().equals(userId)) {
-                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Reference ID already exists for a different user");
-                }
-                // Exact match: idempotent success
-                return WalletResponse.builder()
-                        .userId(existingWallet.getUserId())
-                        .balance(existingWallet.getBalance())
-                        .currency(existingWallet.getCurrency())
-                        .status(existingWallet.getStatus())
-                        .build();
-            }
-        }
-        return null;
-    }
-
     @Transactional
-    public WalletResponse topUpWallet(String userId, Long paymentId) {
-        if (paymentId == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Payment ID is required");
-        }
-
-        String referenceId = "PAYMENT_" + paymentId;
-
-        PaymentResponseDto payment;
-        try {
-            payment = paymentClient.getPayment(paymentId);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid or unknown payment ID: " + paymentId);
-        }
-
-        if (payment == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Payment not found");
-        }
-
-        if (!payment.getCustomerId().equals(userId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Payment does not belong to the authenticated user");
-        }
-
-        String status = payment.getPaymentStatus();
-        if (!"SUCCESS".equalsIgnoreCase(status) && !"COMPLETED".equalsIgnoreCase(status)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Payment is not successful (status: " + status + ")");
-        }
-
-        BigDecimal amount = payment.getAmount();
+    public WalletResponse topUpWallet(String userId, BigDecimal amount, String referenceId, String description) {
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid payment amount");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Top-up amount must be positive");
         }
 
-        // Validate reference attributes and handle idempotency match
-        WalletResponse idempotentResponse = validateReferenceAndGetIdempotentResponseIfMatch(userId, amount, referenceId, TransactionType.CREDIT);
+        WalletResponse idempotentResponse = validateAndHandleIdempotency(userId, amount, referenceId, TransactionType.CREDIT);
         if (idempotentResponse != null) {
             return idempotentResponse;
         }
@@ -157,22 +100,21 @@ public class WalletService {
         wallet.setBalance(wallet.getBalance().add(amount));
         walletRepository.save(wallet);
 
-        WalletTransaction tx = WalletTransaction.builder()
-                .walletId(wallet.getId())
-                .amount(amount)
-                .type(TransactionType.CREDIT)
-                .referenceId(referenceId)
-                .description("Wallet Top-up via Payment #" + paymentId)
-                .build();
-
         try {
+            WalletTransaction tx = WalletTransaction.builder()
+                    .walletId(wallet.getId())
+                    .amount(amount)
+                    .type(TransactionType.CREDIT)
+                    .referenceId(referenceId)
+                    .description(description != null ? description : "Wallet Top-up")
+                    .build();
             walletTransactionRepository.save(tx);
-        } catch (DataIntegrityViolationException e) {
-            WalletResponse retryMatch = validateReferenceAndGetIdempotentResponseIfMatch(userId, amount, referenceId, TransactionType.CREDIT);
-            if (retryMatch != null) {
-                return retryMatch;
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            WalletResponse concurrentCheck = validateAndHandleIdempotency(userId, amount, referenceId, TransactionType.CREDIT);
+            if (concurrentCheck != null) {
+                return concurrentCheck;
             }
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Concurrent transaction reference conflict", e);
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Transaction with reference ID already exists", e);
         }
 
         registerPostCommitEvent(WalletEvent.builder()
@@ -197,7 +139,7 @@ public class WalletService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debit amount must be positive");
         }
 
-        WalletResponse idempotentResponse = validateReferenceAndGetIdempotentResponseIfMatch(userId, amount, referenceId, TransactionType.DEBIT);
+        WalletResponse idempotentResponse = validateAndHandleIdempotency(userId, amount, referenceId, TransactionType.DEBIT);
         if (idempotentResponse != null) {
             return idempotentResponse;
         }
@@ -216,22 +158,21 @@ public class WalletService {
         wallet.setBalance(wallet.getBalance().subtract(amount));
         walletRepository.save(wallet);
 
-        WalletTransaction tx = WalletTransaction.builder()
-                .walletId(wallet.getId())
-                .amount(amount)
-                .type(TransactionType.DEBIT)
-                .referenceId(referenceId)
-                .description(description != null ? description : "Wallet Debit")
-                .build();
-
         try {
+            WalletTransaction tx = WalletTransaction.builder()
+                    .walletId(wallet.getId())
+                    .amount(amount)
+                    .type(TransactionType.DEBIT)
+                    .referenceId(referenceId)
+                    .description(description != null ? description : "Wallet Debit")
+                    .build();
             walletTransactionRepository.save(tx);
-        } catch (DataIntegrityViolationException e) {
-            WalletResponse retryMatch = validateReferenceAndGetIdempotentResponseIfMatch(userId, amount, referenceId, TransactionType.DEBIT);
-            if (retryMatch != null) {
-                return retryMatch;
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            WalletResponse concurrentCheck = validateAndHandleIdempotency(userId, amount, referenceId, TransactionType.DEBIT);
+            if (concurrentCheck != null) {
+                return concurrentCheck;
             }
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Concurrent transaction reference conflict", e);
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Transaction with reference ID already exists", e);
         }
 
         registerPostCommitEvent(WalletEvent.builder()
@@ -256,7 +197,7 @@ public class WalletService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Credit amount must be positive");
         }
 
-        WalletResponse idempotentResponse = validateReferenceAndGetIdempotentResponseIfMatch(userId, amount, referenceId, TransactionType.CREDIT);
+        WalletResponse idempotentResponse = validateAndHandleIdempotency(userId, amount, referenceId, TransactionType.CREDIT);
         if (idempotentResponse != null) {
             return idempotentResponse;
         }
@@ -278,22 +219,21 @@ public class WalletService {
         wallet.setBalance(wallet.getBalance().add(amount));
         walletRepository.save(wallet);
 
-        WalletTransaction tx = WalletTransaction.builder()
-                .walletId(wallet.getId())
-                .amount(amount)
-                .type(TransactionType.CREDIT)
-                .referenceId(referenceId)
-                .description(description != null ? description : "Wallet Credit")
-                .build();
-
         try {
+            WalletTransaction tx = WalletTransaction.builder()
+                    .walletId(wallet.getId())
+                    .amount(amount)
+                    .type(TransactionType.CREDIT)
+                    .referenceId(referenceId)
+                    .description(description != null ? description : "Wallet Credit")
+                    .build();
             walletTransactionRepository.save(tx);
-        } catch (DataIntegrityViolationException e) {
-            WalletResponse retryMatch = validateReferenceAndGetIdempotentResponseIfMatch(userId, amount, referenceId, TransactionType.CREDIT);
-            if (retryMatch != null) {
-                return retryMatch;
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            WalletResponse concurrentCheck = validateAndHandleIdempotency(userId, amount, referenceId, TransactionType.CREDIT);
+            if (concurrentCheck != null) {
+                return concurrentCheck;
             }
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Concurrent transaction reference conflict", e);
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Transaction with reference ID already exists", e);
         }
 
         registerPostCommitEvent(WalletEvent.builder()
@@ -310,6 +250,36 @@ public class WalletService {
                 .currency(wallet.getCurrency())
                 .status(wallet.getStatus())
                 .build();
+    }
+
+    private WalletResponse validateAndHandleIdempotency(String userId, BigDecimal amount, String referenceId, TransactionType expectedType) {
+        if (referenceId != null && !referenceId.isBlank()) {
+            Optional<WalletTransaction> existingOpt = walletTransactionRepository.findByReferenceId(referenceId);
+            if (existingOpt.isPresent()) {
+                WalletTransaction existing = existingOpt.get();
+                Wallet existingWallet = walletRepository.findById(existing.getWalletId()).orElse(null);
+
+                if (existingWallet == null || !existingWallet.getUserId().equals(userId)) {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Reference ID already used by a different user");
+                }
+
+                if (existing.getAmount() == null || existing.getAmount().compareTo(amount) != 0) {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Reference ID already used with a different amount");
+                }
+
+                if (existing.getType() != expectedType) {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Reference ID already used with a different transaction type");
+                }
+
+                return WalletResponse.builder()
+                        .userId(existingWallet.getUserId())
+                        .balance(existingWallet.getBalance())
+                        .currency(existingWallet.getCurrency())
+                        .status(existingWallet.getStatus())
+                        .build();
+            }
+        }
+        return null;
     }
 
     @Transactional(readOnly = true)

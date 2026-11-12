@@ -1,9 +1,11 @@
 package com.easylabour.bookingservice.application.service;
 
 import com.easylabour.bookingservice.domain.model.Booking;
+import com.easylabour.bookingservice.domain.model.BookingOutboxEvent;
 import com.easylabour.bookingservice.domain.model.BookingStatus;
 import com.easylabour.bookingservice.domain.model.BookingWorker;
 import com.easylabour.bookingservice.domain.model.BookingWorkerStatus;
+import com.easylabour.bookingservice.domain.repository.BookingOutboxRepository;
 import com.easylabour.bookingservice.domain.repository.BookingRepository;
 import com.easylabour.bookingservice.domain.repository.BookingWorkerRepository;
 import com.easylabour.bookingservice.infrastructure.kafka.BookingEventProducer;
@@ -28,6 +30,7 @@ import java.util.Optional;
 public class BookingService {
     private final BookingRepository bookingRepository;
     private final BookingWorkerRepository bookingWorkerRepository;
+    private final BookingOutboxRepository bookingOutboxRepository;
     private final WorkerAvailabilityService workerAvailabilityService;
     private final CouponService couponService;
     private final BookingEventProducer eventProducer;
@@ -172,10 +175,62 @@ public class BookingService {
     }
 
     @Transactional
+    public Booking completeBooking(Long bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
+
+        if (booking.getStatus() == BookingStatus.CANCELLED || booking.getStatus() == BookingStatus.FAILED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot complete a cancelled or failed booking");
+        }
+
+        if (booking.getStatus() == BookingStatus.COMPLETED || booking.getStatus() == BookingStatus.SERVICE_COMPLETED) {
+            return booking;
+        }
+
+        List<BookingWorker> workers = bookingWorkerRepository.findByBookingId(bookingId);
+        if (workers.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot complete booking without an assigned worker");
+        }
+
+        BookingWorker workerAssignment = workers.get(0);
+        String trustedWorkerId = workerAssignment.getWorkerId();
+        BigDecimal payoutAmount = booking.getTotalAmount();
+
+        booking.setStatus(BookingStatus.COMPLETED);
+        Booking updatedBooking = bookingRepository.save(booking);
+
+        workerAssignment.setStatus(BookingWorkerStatus.SERVICE_COMPLETED);
+        workerAssignment.setServiceCompletedAt(LocalDateTime.now());
+        workerAssignment.setEarnings(payoutAmount);
+        bookingWorkerRepository.save(workerAssignment);
+
+        String referenceId = "BOOKING_EARNINGS_" + booking.getId();
+        if (bookingOutboxRepository.findByReferenceId(referenceId).isEmpty()) {
+            BookingOutboxEvent outboxEvent = BookingOutboxEvent.builder()
+                    .bookingId(booking.getId())
+                    .workerId(trustedWorkerId)
+                    .amount(payoutAmount)
+                    .referenceId(referenceId)
+                    .status("PENDING")
+                    .retryCount(0)
+                    .nextRetryTime(LocalDateTime.now())
+                    .build();
+            bookingOutboxRepository.save(outboxEvent);
+        }
+
+        publishEvent(updatedBooking, "BOOKING_COMPLETED");
+        return updatedBooking;
+    }
+
+    @Transactional
     public Booking updateWorkerBookingStatus(Long bookingId, String workerId, BookingStatus newStatus) {
         BookingWorker assignment = bookingWorkerRepository.findByBookingIdAndWorkerId(bookingId, workerId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied to booking"));
         
+        if (newStatus == BookingStatus.COMPLETED || newStatus == BookingStatus.SERVICE_COMPLETED) {
+            return completeBooking(bookingId);
+        }
+
         Booking booking = assignment.getBooking();
         booking.setStatus(newStatus);
         Booking updated = bookingRepository.save(booking);
