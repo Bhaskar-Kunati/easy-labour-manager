@@ -62,6 +62,16 @@ This document defines the architectural components of the Easy Labour Manager ap
     - **Specs Path**: `backend-microservices/common-lib/specs`
     - **Keywords**: shared DTO, shared model, common DTO, common exception, shared exception, Kafka event contract, event contract, shared enum, shared utility, common library.
 
+12. **Admin Service (`admin-service`)**
+    - **Path**: `backend-microservices/admin-service`
+    - **Specs Path**: `backend-microservices/admin-service/specs`
+    - **Keywords**: admin, dashboard, analytics, administration, reporting, platform metrics, financial reconciliation, operational dashboard, admin dashboard, platform analytics.
+
+13. **Wallet Service (`wallet-service`)**
+    - **Path**: `backend-microservices/wallet-service`
+    - **Specs Path**: `backend-microservices/wallet-service/specs`
+    - **Keywords**: wallet, wallet balance, wallet transaction, wallet history, transaction history, credit, debit, withdrawal, wallet statement, payout, payout destination, withdrawal request, digital wallet, wallet funds.
+
 ---
 
 ## Routing Principles

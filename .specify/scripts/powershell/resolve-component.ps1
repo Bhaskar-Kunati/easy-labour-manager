@@ -79,6 +79,20 @@ $components = @(
         Keywords     = @("notification", "push notification", "sms", "alert", "in-app notification", "messaging notification", "kafka notification event")
     },
     @{
+        Name         = "admin-service"
+        Path         = "backend-microservices/admin-service"
+        SpecsPath    = "backend-microservices/admin-service/specs"
+        ExplicitKeys = @("admin-service", "admin service")
+        Keywords     = @("admin", "dashboard", "analytics", "administration", "reporting", "platform metrics", "financial reconciliation", "operational dashboard", "admin dashboard", "platform analytics")
+    },
+    @{
+        Name         = "wallet-service"
+        Path         = "backend-microservices/wallet-service"
+        SpecsPath    = "backend-microservices/wallet-service/specs"
+        ExplicitKeys = @("wallet-service", "wallet service")
+        Keywords     = @("wallet", "wallet balance", "wallet transaction", "wallet history", "transaction history", "credit", "debit", "withdrawal", "wallet statement", "payout", "payout destination", "withdrawal request", "digital wallet", "wallet funds")
+    },
+    @{
         Name         = "common-lib"
         Path         = "backend-microservices/common-lib"
         SpecsPath    = "backend-microservices/common-lib/specs"

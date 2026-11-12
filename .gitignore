@@ -30,3 +30,6 @@ Thumbs.db
 gemini_API_key.txt
 .env
 .env.*
+
+# Spec-Kit integration cache (machine-local, not shared)
+.specify/integrations/.cache/
