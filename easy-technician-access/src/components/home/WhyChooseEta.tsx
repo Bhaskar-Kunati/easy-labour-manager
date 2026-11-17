@@ -25,7 +25,7 @@ const benefits = [
 
 export default function WhyChooseEta() {
   return (
-    <section className="py-20 bg-white px-4 sm:px-6 lg:px-8">
+    <section className="py-12 lg:py-16 bg-white px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <span className="text-primary font-semibold text-xs tracking-wider uppercase mb-2 block">

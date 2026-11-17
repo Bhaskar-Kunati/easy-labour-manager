@@ -1,8 +1,10 @@
+'use client';
+
 import { Smartphone, Download, CheckCircle2 } from 'lucide-react';
 
 export default function AppPromoBanner() {
   return (
-    <section className="py-20 bg-white px-4 sm:px-6 lg:px-8">
+    <section className="py-12 lg:py-16 bg-white px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="bg-gradient-to-r from-primary via-blue-600 to-indigo-700 rounded-3xl p-8 sm:p-12 lg:p-16 text-white shadow-2xl relative overflow-hidden">
           <div className="absolute right-0 bottom-0 translate-x-12 translate-y-12 opacity-10 pointer-events-none">
