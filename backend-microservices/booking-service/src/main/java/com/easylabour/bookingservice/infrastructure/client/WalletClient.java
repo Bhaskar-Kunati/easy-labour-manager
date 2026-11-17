@@ -20,7 +20,7 @@ public class WalletClient {
     @Value("${wallet.service.url:http://localhost:8089}")
     private String walletServiceUrl;
 
-    @Value("${wallet.internal.secret-key:internal-secret-key}")
+    @Value("${booking.wallet.internal-secret:}")
     private String internalSecretKey;
 
     public void creditWallet(String workerId, BigDecimal amount, String referenceId, String description) {

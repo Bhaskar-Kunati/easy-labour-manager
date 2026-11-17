@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+
+payment:
+  internal:
+    admin-secret: ${ADMIN_TO_PAYMENT_INTERNAL_SECRET:admin-payment-secret-dev}

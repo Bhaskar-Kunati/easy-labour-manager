@@ -21,12 +21,24 @@ public class BookingInternalController {
 
     private final BookingRepository bookingRepository;
 
-    @Value("${wallet.internal.secret-key:internal-secret-key}")
+    @Value("${booking.internal.admin-secret:}")
     private String internalServiceKey;
 
+    private boolean secureEquals(String a, String b) {
+        if (a == null || b == null) {
+            return false;
+        }
+        byte[] aBytes = a.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        byte[] bBytes = b.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        return java.security.MessageDigest.isEqual(aBytes, bBytes);
+    }
+
     private void validateInternalKey(String internalKey) {
-        if (internalKey == null || !internalKey.equals(internalServiceKey)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid or missing internal service key");
+        if (internalServiceKey == null || internalServiceKey.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal service key not configured");
+        }
+        if (!secureEquals(internalKey, internalServiceKey)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid or missing internal service key");
         }
     }
 

@@ -19,7 +19,7 @@ public class PaymentClient {
     @Value("${services.payment.url:http://localhost:8085}")
     private String paymentServiceUrl;
 
-    @Value("${wallet.internal.secret-key:internal-secret-key}")
+    @Value("${services.payment.internal-secret:}")
     private String internalSecretKey;
 
     public Map<String, Object> getAnalytics() {

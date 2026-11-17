@@ -1,5 +1,6 @@
 package com.easylabour.walletservice.web.controller;
 
+import com.easylabour.walletservice.application.service.PayoutService;
 import com.easylabour.walletservice.application.service.WalletService;
 import com.easylabour.walletservice.domain.repository.WalletRepository;
 import com.easylabour.walletservice.domain.repository.WalletTransactionRepository;
@@ -30,7 +31,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest({WalletInternalController.class, WalletController.class, AdminWalletController.class})
 @Import(SecurityConfig.class)
-@TestPropertySource(properties = "wallet.internal.secret-key=test-secret-key")
+@TestPropertySource(properties = {
+    "wallet.internal.booking-secret=test-secret-key",
+    "wallet.internal.admin-secret=test-secret-key"
+})
 class WalletSecurityTest {
 
     @Autowired
@@ -47,6 +51,15 @@ class WalletSecurityTest {
 
     @MockBean
     private WalletTransactionRepository walletTransactionRepository;
+
+    @MockBean
+    private PayoutService payoutService;
+
+    @MockBean
+    private org.springframework.boot.web.client.RestTemplateBuilder restTemplateBuilder;
+
+    @MockBean
+    private org.springframework.web.client.RestTemplate restTemplate;
 
     @Autowired
     private ObjectMapper objectMapper;

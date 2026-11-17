@@ -1,10 +1,10 @@
 jwt:
-  secret: 404e635266556a586e3272357538782f413f4428472b4b6250655368566d5971
+  secret: ${JWT_SECRET}
   expiration: 86400000
   datasource:
-    url: jdbc:postgresql://127.0.0.1:5433/el_db
-    username: el_user
-    password: password
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://127.0.0.1:5433/el_db}
+    username: ${SPRING_DATASOURCE_USERNAME:el_user}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:

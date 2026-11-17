@@ -20,7 +20,7 @@ public class WalletClient {
     @Value("${services.wallet.url:http://localhost:8089}")
     private String walletServiceUrl;
 
-    @Value("${wallet.internal.secret-key:internal-secret-key}")
+    @Value("${services.wallet.internal-secret:}")
     private String internalSecretKey;
 
     public Map<String, Object> getAnalytics() {

@@ -1,0 +1,75 @@
+openapi: 3.0.3
+info:
+  title: Notification Service API - Feature 017
+  version: 1.0.0
+paths:
+  /api/v1/notifications/tokens:
+    post:
+      summary: Register FCM device token
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                deviceType:
+                  type: string
+                  enum: [ANDROID, WEB]
+      responses:
+        '200':
+          description: Token registered successfully
+  /api/v1/notifications:
+    get:
+      summary: List user notifications
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of notifications
+  /api/v1/notifications/{id}/read:
+    put:
+      summary: Mark notification as read
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Marked as read
+  /api/v1/admin/announcements:
+    post:
+      summary: Send broadcast or targeted announcement (Admin)
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                message:
+                  type: string
+                targetGroup:
+                  type: string
+                  enum: [ALL, CUSTOMERS, WORKERS]
+      responses:
+        '201':
+          description: Announcement broadcasted successfully
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

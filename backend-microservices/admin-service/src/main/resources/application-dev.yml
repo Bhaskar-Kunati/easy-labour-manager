@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
+
+services:
+  booking:
+    internal-secret: ${ADMIN_TO_BOOKING_INTERNAL_SECRET:admin-booking-secret-dev}
+  payment:
+    internal-secret: ${ADMIN_TO_PAYMENT_INTERNAL_SECRET:admin-payment-secret-dev}
+  wallet:
+    internal-secret: ${ADMIN_TO_WALLET_INTERNAL_SECRET:admin-wallet-secret-dev}

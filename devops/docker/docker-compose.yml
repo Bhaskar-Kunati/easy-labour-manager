@@ -9,13 +9,13 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: el_db
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"
 
   mongodb:
     image: mongo:6.0
     container_name: el-mongodb
     ports:
-      - "27017:27017"
+      - "127.0.0.1:27017:27017"
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.0
@@ -30,7 +30,7 @@ services:
     depends_on:
       - zookeeper
     ports:
-      - "9092:9092"
+      - "127.0.0.1:9092:9092"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181

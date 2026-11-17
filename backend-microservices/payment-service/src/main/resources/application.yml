@@ -5,16 +5,16 @@ spring:
   application:
     name: payment-service
   datasource:
-    url: jdbc:postgresql://127.0.0.1:5433/el_db
-    username: el_user
-    password: password
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://127.0.0.1:5433/el_db}
+    username: ${SPRING_DATASOURCE_USERNAME:el_user}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
   kafka:
-    bootstrap-servers: ${KAFKA_HOST:localhost}:9092
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     consumer:
       group-id: payment-group
       auto-offset-reset: earliest
@@ -25,3 +25,7 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+payment:
+  internal:
+    admin-secret: ${ADMIN_TO_PAYMENT_INTERNAL_SECRET}

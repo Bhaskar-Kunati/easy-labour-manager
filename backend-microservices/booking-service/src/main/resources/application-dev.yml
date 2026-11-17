@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+
+booking:
+  wallet:
+    internal-secret: ${BOOKING_TO_WALLET_INTERNAL_SECRET:booking-wallet-secret-dev}
+  internal:
+    admin-secret: ${ADMIN_TO_BOOKING_INTERNAL_SECRET:admin-booking-secret-dev}

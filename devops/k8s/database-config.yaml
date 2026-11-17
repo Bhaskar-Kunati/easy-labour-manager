@@ -15,3 +15,8 @@ type: Opaque
 data:
   POSTGRES_USER: "ZWxfdXNlcg==" # el_user
   POSTGRES_PASSWORD: "cGFzc3dvcmQ=" # password
+  JWT_SECRET: "ZWFzeWxhYm91ci1zZWNyZXQtand0LWtleS1mb3ItcHJvZHVjdGlvbi1leGFtcGxlLW9ubHk=" # easylabour-secret-jwt-key-for-production-example-only
+  BOOKING_TO_WALLET_INTERNAL_SECRET: "Ym9va2luZy13YWxsZXQtc2VjcmV0LXByb2QtZXhhbXBsZQ==" # booking-wallet-secret-prod-example
+  ADMIN_TO_BOOKING_INTERNAL_SECRET: "YWRtaW4tYm9va2luZy1zZWNyZXQtcHJvZC1leGFtcGxl" # admin-booking-secret-prod-example
+  ADMIN_TO_PAYMENT_INTERNAL_SECRET: "YWRtaW4tcGF5bWVudC1zZWNyZXQtcHJvZC1leGFtcGxl" # admin-payment-secret-prod-example
+  ADMIN_TO_WALLET_INTERNAL_SECRET: "YWRtaW4td2FsbGV0LXNlY3JldC1wcm9kLWV4YW1wbGU=" # admin-wallet-secret-prod-example

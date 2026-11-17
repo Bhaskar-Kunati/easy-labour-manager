@@ -38,3 +38,13 @@ spec:
             configMapKeyRef:
               name: database-config
               key: KAFKA_BOOTSTRAP_SERVERS
+        - name: BOOKING_TO_WALLET_INTERNAL_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: database-secrets
+              key: BOOKING_TO_WALLET_INTERNAL_SECRET
+        - name: ADMIN_TO_BOOKING_INTERNAL_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: database-secrets
+              key: ADMIN_TO_BOOKING_INTERNAL_SECRET

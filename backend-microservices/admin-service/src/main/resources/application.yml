@@ -5,9 +5,9 @@ spring:
   application:
     name: admin-service
   datasource:
-    url: jdbc:postgresql://127.0.0.1:5433/el_db
-    username: el_user
-    password: password
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://127.0.0.1:5433/el_db}
+    username: ${SPRING_DATASOURCE_USERNAME:el_user}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -17,11 +17,10 @@ spring:
 services:
   booking:
     url: ${BOOKING_SERVICE_URL:http://localhost:8083}
+    internal-secret: ${ADMIN_TO_BOOKING_INTERNAL_SECRET}
   payment:
     url: ${PAYMENT_SERVICE_URL:http://localhost:8085}
+    internal-secret: ${ADMIN_TO_PAYMENT_INTERNAL_SECRET}
   wallet:
     url: ${WALLET_SERVICE_URL:http://localhost:8089}
-
-wallet:
-  internal:
-    secret-key: ${WALLET_INTERNAL_SECRET_KEY:internal-secret-key}
+    internal-secret: ${ADMIN_TO_WALLET_INTERNAL_SECRET}

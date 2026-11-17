@@ -1,0 +1,5 @@
+jwt:
+  secret: ${JWT_SECRET:404e635266556a586e3272357538782f413f4428472b4b6250655368566d5971}
+spring:
+  datasource:
+    password: ${SPRING_DATASOURCE_PASSWORD:password}

@@ -33,3 +33,8 @@ spec:
             secretKeyRef:
               name: database-secrets
               key: POSTGRES_PASSWORD
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: database-secrets
+              key: JWT_SECRET

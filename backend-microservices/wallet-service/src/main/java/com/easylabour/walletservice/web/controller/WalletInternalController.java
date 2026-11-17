@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.List;
 import java.util.Map;
 
@@ -30,15 +32,36 @@ public class WalletInternalController {
     private final WalletTransactionRepository walletTransactionRepository;
     private final PayoutService payoutService;
 
-    @Value("${wallet.internal.secret-key}")
-    private String internalServiceKey;
+    @Value("${wallet.internal.booking-secret:}")
+    private String bookingSecretKey;
 
-    private void validateInternalKey(String internalKey) {
-        if (internalServiceKey == null || internalServiceKey.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal service key not configured");
+    @Value("${wallet.internal.admin-secret:}")
+    private String adminSecretKey;
+
+    private boolean secureEquals(String a, String b) {
+        if (a == null || b == null) {
+            return false;
         }
-        if (internalKey == null || !internalKey.equals(internalServiceKey)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid or missing internal service key");
+        byte[] aBytes = a.getBytes(StandardCharsets.UTF_8);
+        byte[] bBytes = b.getBytes(StandardCharsets.UTF_8);
+        return MessageDigest.isEqual(aBytes, bBytes);
+    }
+
+    private void validateBookingKey(String internalKey) {
+        if (bookingSecretKey == null || bookingSecretKey.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal booking service key not configured");
+        }
+        if (!secureEquals(internalKey, bookingSecretKey)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid or missing internal service key");
+        }
+    }
+
+    private void validateAdminKey(String internalKey) {
+        if (adminSecretKey == null || adminSecretKey.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal admin service key not configured");
+        }
+        if (!secureEquals(internalKey, adminSecretKey)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid or missing internal service key");
         }
     }
 
@@ -46,7 +69,7 @@ public class WalletInternalController {
     public ResponseEntity<WalletResponse> debitWallet(
             @RequestHeader(value = "X-Internal-Service-Key", required = false) String internalKey,
             @Valid @RequestBody WalletDebitRequest request) {
-        validateInternalKey(internalKey);
+        validateBookingKey(internalKey);
         WalletResponse response = walletService.debitWallet(request.getUserId(), request.getAmount(), request.getReferenceId(), request.getDescription());
         return ResponseEntity.ok(response);
     }
@@ -55,7 +78,7 @@ public class WalletInternalController {
     public ResponseEntity<WalletResponse> creditWallet(
             @RequestHeader(value = "X-Internal-Service-Key", required = false) String internalKey,
             @Valid @RequestBody WalletCreditRequest request) {
-        validateInternalKey(internalKey);
+        validateBookingKey(internalKey);
         WalletResponse response = walletService.creditWallet(request.getUserId(), request.getAmount(), request.getReferenceId(), request.getDescription());
         return ResponseEntity.ok(response);
     }
@@ -63,7 +86,7 @@ public class WalletInternalController {
     @GetMapping("/internal/analytics")
     public ResponseEntity<Map<String, Object>> getWalletAnalytics(
             @RequestHeader(value = "X-Internal-Service-Key", required = false) String internalKey) {
-        validateInternalKey(internalKey);
+        validateAdminKey(internalKey);
 
         var wallets = walletRepository.findAll();
         var transactions = walletTransactionRepository.findAll();
@@ -106,7 +129,7 @@ public class WalletInternalController {
     @GetMapping("/internal/payouts")
     public ResponseEntity<List<PayoutResponseDto>> getAllPayouts(
             @RequestHeader(value = "X-Internal-Service-Key", required = false) String internalKey) {
-        validateInternalKey(internalKey);
+        validateAdminKey(internalKey);
         return ResponseEntity.ok(payoutService.getAllPayouts());
     }
 
@@ -114,7 +137,7 @@ public class WalletInternalController {
     public ResponseEntity<PayoutResponseDto> approvePayout(
             @RequestHeader(value = "X-Internal-Service-Key", required = false) String internalKey,
             @PathVariable Long id) {
-        validateInternalKey(internalKey);
+        validateAdminKey(internalKey);
         return ResponseEntity.ok(payoutService.approvePayout(id));
     }
 }

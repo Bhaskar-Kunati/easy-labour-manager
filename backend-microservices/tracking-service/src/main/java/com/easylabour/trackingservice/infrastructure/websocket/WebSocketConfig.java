@@ -3,6 +3,7 @@ package com.easylabour.trackingservice.infrastructure.websocket;
 import com.easylabour.trackingservice.infrastructure.kafka.BookingEventConsumer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -25,6 +26,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final BookingEventConsumer bookingEventConsumer;
 
+    @Value("${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}")
+    private String corsAllowedOrigins;
+
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
         config.enableSimpleBroker("/topic");
@@ -33,7 +37,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws-tracking").setAllowedOriginPatterns("*").withSockJS();
+        String[] origins = corsAllowedOrigins != null ? corsAllowedOrigins.split(",") : new String[]{"http://localhost:3000", "http://localhost:5173"};
+        registry.addEndpoint("/ws-tracking").setAllowedOriginPatterns(origins).withSockJS();
     }
 
     @Override

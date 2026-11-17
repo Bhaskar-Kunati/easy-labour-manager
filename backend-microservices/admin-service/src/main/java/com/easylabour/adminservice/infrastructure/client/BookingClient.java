@@ -19,7 +19,7 @@ public class BookingClient {
     @Value("${services.booking.url:http://localhost:8083}")
     private String bookingServiceUrl;
 
-    @Value("${wallet.internal.secret-key:internal-secret-key}")
+    @Value("${services.booking.internal-secret:}")
     private String internalSecretKey;
 
     public Map<String, Object> getAnalytics() {

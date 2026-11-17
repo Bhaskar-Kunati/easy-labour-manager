@@ -25,7 +25,7 @@ class InternalServiceKeyFilterTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        ReflectionTestUtils.setField(filter, "internalServiceKey", "secret-key-123");
+        ReflectionTestUtils.setField(filter, "bookingSecretKey", "secret-key-123");
         SecurityContextHolder.clearContext();
     }
 

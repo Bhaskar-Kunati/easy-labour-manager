@@ -13,13 +13,24 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.List;
 
 @Component
 public class InternalServiceKeyFilter extends OncePerRequestFilter {
 
-    @Value("${wallet.internal.secret-key:}")
-    private String internalServiceKey;
+    @Value("${wallet.internal.booking-secret:}")
+    private String bookingSecretKey;
+
+    private boolean secureEquals(String a, String b) {
+        if (a == null || b == null) {
+            return false;
+        }
+        byte[] aBytes = a.getBytes(StandardCharsets.UTF_8);
+        byte[] bBytes = b.getBytes(StandardCharsets.UTF_8);
+        return MessageDigest.isEqual(aBytes, bBytes);
+    }
 
     @Override
     protected void doFilterInternal(
@@ -33,18 +44,18 @@ public class InternalServiceKeyFilter extends OncePerRequestFilter {
         if (path != null && (path.endsWith("/api/wallet/credit") || path.endsWith("/api/wallet/debit"))) {
             String internalKey = request.getHeader("X-Internal-Service-Key");
 
-            if (internalServiceKey == null || internalServiceKey.isBlank()) {
-                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal service key not configured");
+            if (bookingSecretKey == null || bookingSecretKey.isBlank()) {
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal booking service key not configured");
                 return;
             }
 
-            if (internalKey == null || !internalKey.equals(internalServiceKey)) {
+            if (internalKey == null || !secureEquals(internalKey, bookingSecretKey)) {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or missing internal service key");
                 return;
             }
 
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    "internal-service",
+                    "booking-service",
                     null,
                     List.of(new SimpleGrantedAuthority("ROLE_INTERNAL_SERVICE"))
             );
