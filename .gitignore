@@ -33,3 +33,23 @@ gemini_API_key.txt
 
 # Spec-Kit integration cache (machine-local, not shared)
 .specify/integrations/.cache/
+
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Build output
+dist/
+build/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
